@@ -55,7 +55,6 @@ describe("User Authentication", () => {
         .request(app.app)
         .get("/dashboard")
         .set("Authorization", `Bearer ${authToken}`);
-
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message", "Welcome to dashboard");
     });

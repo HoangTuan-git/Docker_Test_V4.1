@@ -113,7 +113,10 @@ jobs:
       - name: Start auth service for product tests
         run: |
           cd auth
+        run:
+          if: steps.cache-auth.outputs.cache-hit != 'true'
           npm install
+        run: |
           echo "MONGODB_AUTH_URI=mongodb://localhost:27017/auth_test" > .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
           npm start &

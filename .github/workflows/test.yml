@@ -29,12 +29,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18' # Hoặc phiên bản Node.js bạn đang dùng
-          cache: 'npm'
-          cache-dependency-path: auth/package-lock.json
+      # cache node_modules trực tiếp
+      - name: Cache auth node_modules
+        id : cache-auth
+        uses: actions/cache@v3
+        with:
+          path: auth/node_modules
+          key: ${{ runner.os }}-auth-${{ hashFiles('auth/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-auth-
 
       # Step 3: Cài đặt dependencies cho service "auth"
       # `npm ci` sẽ sử dụng cache nếu có, giúp tiết kiệm thời gian
       - name: Install auth dependencies
+        if: steps.cache-auth.outputs.cache-hit != 'true'
         run: npm install --prefix auth
 
       # Step 4: Tạo file .env cho môi trường test của service "auth"
@@ -74,11 +82,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18' # Hoặc phiên bản Node.js bạn đang dùng
-          cache: 'npm'
-          cache-dependency-path: product/package-lock.json
+        
+      # cache node_modules trực tiếp
+      - name: Cache product node_modules
+        id : cache-product
+        uses: actions/cache@v3
+        with:
+          path: product/node_modules
+          key: ${{ runner.os }}-product-${{ hashFiles('product/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-product-
 
       # Step 3: Cài đặt dependencies cho service "product"
       - name: Install product dependencies
+        if: steps.cache-product.outputs.cache-hit != 'true'
         run: npm install --prefix product
 
       # Step 4: Tạo file .env cho môi trường test của service "product"
@@ -113,8 +130,8 @@ jobs:
       needs: [test-auth, test-product]
       runs-on: ubuntu-latest
       env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
       strategy:
         matrix:
           service: [auth, product, order, api-gateway]
@@ -139,7 +156,7 @@ jobs:
           context: ./${{ matrix.service }}
           file: ./${{ matrix.service }}/Dockerfile
           push: true
-          tags: 3002tad/eproject-${{ matrix.service }}:latest
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.image }}:latest
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}

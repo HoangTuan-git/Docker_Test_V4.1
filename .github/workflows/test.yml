@@ -111,13 +111,13 @@ jobs:
       # Step 5: Chạy test cho service "product"
       # Tối ưu: Không khởi động auth service thật, thay vào đó là mock JWT token trong test
       - name: Start auth service for product tests
-        run: |
+        run:
           cd auth
-
+      - name : Install auth dependencies
         if: steps.cache-auth.outputs.cache-hit != 'true'
         run:
           npm install
-
+      - name: Start auth service
         run: |
           echo "MONGODB_AUTH_URI=mongodb://localhost:27017/auth_test" > .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env

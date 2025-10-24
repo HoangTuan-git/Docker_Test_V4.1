@@ -28,7 +28,8 @@ jobs:
       - name: Setup Node.js with cache
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Hoặc phiên bản Node.js bạn đang dùng
+          node-version: '18'
+          cache: 'npm'
       # cache node_modules trực tiếp
       - name: Cache auth node_modules
         id : cache-auth

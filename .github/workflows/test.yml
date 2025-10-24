@@ -111,7 +111,7 @@ jobs:
       # Step 5: Chạy test cho service "product"
       # Tối ưu: Không khởi động auth service thật, thay vào đó là mock JWT token trong test
       - name: Start auth service for product tests
-        run:
+        run: |
           cd auth
           npm install
           echo "MONGODB_AUTH_URI=mongodb://localhost:27017/auth_test" > .env

@@ -96,7 +96,6 @@ describe("Products", () => {
         }
       } catch (error) {
         console.log(`⚠️  API request failed: ${error.message} - Skipping test`);
-        // Don't throw error, just skip the test
       }
     });
   });
